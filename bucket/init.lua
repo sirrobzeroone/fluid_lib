@@ -117,6 +117,9 @@ function bucket.register_liquid(source, flowing, itemname, inventory_image, name
 						for buffer in pairs(buffers) do
 							if fluid_lib.can_insert_into_buffer(ppos, buffer, source, 1000) == 1000 then
 								fluid_lib.insert_into_buffer(ppos, buffer, source, 1000)
+								if ndef.on_timer then
+									minetest.get_node_timer(ppos):start(ndef.node_timer_seconds or 1.0)
+								end
 								place = false
 								break
 							end
@@ -132,6 +135,19 @@ function bucket.register_liquid(source, flowing, itemname, inventory_image, name
 			end
 		})
 	end
+end
+
+function bucket.get_liquid_for_bucket(itemname)
+	local found = nil
+
+	for source, b in pairs(bucket.liquids) do
+		if b.itemname and b.itemname == itemname then
+			found = source
+			break
+		end
+	end
+
+	return found
 end
 
 minetest.register_craftitem("bucket:bucket_empty", {
@@ -240,6 +256,9 @@ minetest.register_craftitem("bucket:bucket_empty", {
 						local fluid = fluid_lib.take_from_buffer(lpos, buffer, 1000)
 						if bucket.liquids[fluid] then
 							itemstack = ItemStack(bucket.liquids[fluid].itemname)
+							if ndef.on_timer then
+								minetest.get_node_timer(lpos):start(ndef.node_timer_seconds or 1.0)
+							end
 						end
 						break
 					end
