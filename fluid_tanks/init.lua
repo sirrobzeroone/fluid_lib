@@ -7,17 +7,22 @@ fluid_tanks = {}
 local function preserve_metadata(pos, oldnode, oldmeta, drops)
 	local buffer    = fluid_lib.get_buffer_data(pos, "buffer")
 	local meta      = minetest.get_meta(pos)
-	local fluid_cnt = meta:get_int("buffer_fluid_storage")
 
-	if fluid_cnt > 0 then
+	if buffer.amount > 0 then
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
 
+		local fluid_desc = "Empty"
+		if buffer.fluid ~= "" then
+			fluid_desc = fluid_lib.cleanse_node_description(buffer.fluid)
+		end
+
 		for i,stack in pairs(drops) do
 			local stack_meta = stack:get_meta()
-			stack_meta:set_int("fluid_storage", fluid_cnt)
-			stack_meta:set_string("description", ndef.description .. "\nContains " .. 
-				buffer.amount .. "/" .. buffer.capacity .. " mB")
+			stack_meta:set_int("fluid_storage", buffer.amount)
+			stack_meta:set_string("fluid", buffer.fluid)
+			stack_meta:set_string("description", ("%s\nContains: %s (%d/%d %s)"):format(ndef.description,
+				fluid_desc, buffer.amount, buffer.capacity, fluid_lib.unit))
 
 			drops[i] = stack
 		end
@@ -30,9 +35,11 @@ end
 local function after_place_node(pos, placer, itemstack, pointed_thing)
 	local item_meta = itemstack:get_meta()
 	local fluid_cnt = item_meta:get_int("fluid_storage")
+	local fluid     = item_meta:get_string("fluid")
 	
 	if fluid_cnt then
 		local meta = minetest.get_meta(pos)
+		meta:set_string("buffer_fluid", fluid)
 		meta:set_int("buffer_fluid_storage", fluid_cnt)
 	end
 
