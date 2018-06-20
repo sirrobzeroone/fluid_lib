@@ -28,7 +28,11 @@ function fluid_lib.get_buffer_data(pos, buffer)
 	local amount    = meta:get_int(buffer .. "_fluid_storage")
 	local capacity  = buffers[buffer].capacity
 	local accepts   = buffers[buffer].accepts
-	local drainable = buffers[buffer].drainable or true
+	local drainable = buffers[buffer].drainable
+
+	if drainable == nil then
+		drainable = true
+	end
 
 	return {
 		fluid     = fluid,
