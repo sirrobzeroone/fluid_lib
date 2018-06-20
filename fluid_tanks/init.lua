@@ -71,8 +71,14 @@ local function tank_on_timer(pos, elapsed)
 		meta:set_string("buffer_fluid", "")
 	end
 
+	local fluid_desc = "Empty"
+	if buffer.fluid ~= "" then
+		fluid_desc = fluid_lib.cleanse_node_description(buffer.fluid)
+	end
+
 	-- Update infotext
-	meta:set_string("infotext", ("%s (%d/%d %s)"):format(ndef.description, buffer.amount, buffer.capacity, fluid_lib.unit))
+	meta:set_string("infotext", ("%s\nContains: %s (%d/%d %s)"):format(ndef.description, fluid_desc,
+		buffer.amount, buffer.capacity, fluid_lib.unit))
 
 	local param2 = math.min(percentile * 63, 63)
 
@@ -107,9 +113,6 @@ local function create_tank_node(tankname, def, fluid_name)
 		if fdef and fdef.tiles then
 			special_tiles = fdef.tiles
 		end
-
-		local fluid_desc = fluid_lib.cleanse_node_description(fluid_name)
-		desc = desc .. " of "..fluid_desc
 	end
 
 	minetest.register_node(tankname, {
@@ -188,10 +191,8 @@ function fluid_tanks.register_tank(tankname, def)
 	end
 end
 
---minetest.after(0.2, function ()
-	fluid_tanks.register_tank("fluid_tanks:tank", {
-		description = "Fluid Tank",
-		capacity = 16000,
-		accepts = true,
-	})
---end)
+fluid_tanks.register_tank("fluid_tanks:tank", {
+	description = "Fluid Tank",
+	capacity = 16000,
+	accepts = true,
+})
