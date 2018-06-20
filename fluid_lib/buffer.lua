@@ -69,7 +69,7 @@ end
 function fluid_lib.can_insert_into_buffer(pos, buffer, fluid, count)
 	local bfdata = fluid_lib.get_buffer_data(pos, buffer)
 	if not bfdata then return 0 end
-	if bfdata.fluid ~= fluid and bfdata.fluid ~= "" then return 0 end
+	if not fluid_lib.buffer_accepts_fluid(pos, buffer, fluid) then return 0 end
 
 	local can_put = 0
 	if bfdata.amount + count > bfdata.capacity then

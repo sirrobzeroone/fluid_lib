@@ -111,12 +111,15 @@ function bucket.register_liquid(source, flowing, itemname, inventory_image, name
 				-- Fill any fluid buffers if present
 				local place = true
 				if ndef.fluid_buffers then
-					local buffers = fluid_lib.get_node_buffers(lpos)
-					for buffer in pairs(buffers) do
-						if fluid_lib.can_insert_into_buffer(lpos, buffer, source, 1000) == 1000 then
-							fluid_lib.insert_into_buffer(lpos, buffer, source, 1000)
-							place = false
-							break
+					local ppos    = pointed_thing.under
+					local buffers = fluid_lib.get_node_buffers(ppos)
+					if buffers then
+						for buffer in pairs(buffers) do
+							if fluid_lib.can_insert_into_buffer(ppos, buffer, source, 1000) == 1000 then
+								fluid_lib.insert_into_buffer(ppos, buffer, source, 1000)
+								place = false
+								break
+							end
 						end
 					end
 				end
@@ -222,7 +225,7 @@ minetest.register_craftitem("bucket:bucket_empty", {
 
 		if check_protection(lpos, user
 				and user:get_player_name()
-				or "", "take "..source) then
+				or "", "take "..node.name) then
 			return
 		end
 
@@ -231,13 +234,15 @@ minetest.register_craftitem("bucket:bucket_empty", {
 		-- Remove fluid from buffers if present
 		if ndef.fluid_buffers then
 			local buffers = fluid_lib.get_node_buffers(lpos)
-			for buffer in pairs(buffers) do
-				if fluid_lib.can_take_from_buffer(lpos, buffer, 1000) == 1000 then
-					local fluid = fluid_lib.take_from_buffer(lpos, buffer, 1000)
-					if bucket.liquids[fluid] then
-						itemstack = ItemStack(bucket.liquids[fluid].itemname)
+			if buffers then
+				for buffer in pairs(buffers) do
+					if fluid_lib.can_take_from_buffer(lpos, buffer, 1000) == 1000 then
+						local fluid = fluid_lib.take_from_buffer(lpos, buffer, 1000)
+						if bucket.liquids[fluid] then
+							itemstack = ItemStack(bucket.liquids[fluid].itemname)
+						end
+						break
 					end
-					break
 				end
 			end
 		end

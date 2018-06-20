@@ -5,13 +5,13 @@ This API adds support for `fluid_buffers` inside nodes. This means that nodes ca
 1. Add the node to the `fluid_container` group.
 2. Add the following to the node defintion:
 ```
-fluid_buffers = {
-    buffer_name = {
-        capacity = 2000,
-        accepts = {"default:water_source", "group:water_source"}, -- you can also set this to true to accept any fluid!
-        drainable = true,
-    },
-}
+    fluid_buffers = {
+        buffer_name = {
+            capacity = 2000,
+            accepts = {"default:water_source", "group:water_source"}, -- you can also set this to true to accept any fluid!
+            drainable = true,
+        },
+    }
 ```
 3. Set the appropriate metadata.
 
@@ -27,13 +27,13 @@ All numbers are in **milli-buckets** (1 bucket = 1000 mB).
 * `fluid_lib.get_buffer_data(pos, buffer)`
 	* Returns all the information about this buffer.
 ```
-{
-    fluid     = fluid source block,
-    amount    = amount of fluid,
-    accepts   = list of accepted fluids,
-    capacity  = capacity of the buffer,
-    drainable = is this buffer drainable,
-}
+    {
+        fluid     = fluid source block,
+        amount    = amount of fluid,
+        accepts   = list of accepted fluids,
+        capacity  = capacity of the buffer,
+        drainable = is this buffer drainable,
+    }
 ```
 
 * `fluid_lib.buffer_accepts_fluid(pos, buffer, fluid)`
