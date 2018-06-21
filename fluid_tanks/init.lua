@@ -16,7 +16,7 @@ local function preserve_metadata(pos, oldnode, oldmeta, drops)
 			local stack_meta = stack:get_meta()
 			stack_meta:set_int("fluid_storage", buffer.amount)
 			stack_meta:set_string("fluid", buffer.fluid)
-			stack_meta:set_string("description", ("%s\nContents: %s (%d/%d %s)"):format(ndef.description,
+			stack_meta:set_string("description", ("%s\nContents: %s"):format(ndef.description,
 				fluid_lib.buffer_to_string(buffer)))
 
 			drops[i] = stack
