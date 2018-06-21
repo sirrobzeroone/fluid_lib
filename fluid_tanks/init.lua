@@ -73,6 +73,11 @@ local function tank_on_timer(pos, elapsed)
 		meta:set_string("buffer_fluid", "")
 	end
 
+	if node_name:match("^:") ~= nil then
+		node_name = node_name:sub(2)
+		ndef = minetest.registered_nodes[node_name]
+	end
+
 	-- Update infotext
 	meta:set_string("infotext", ("%s\nContents: %s"):format(ndef.description,
 		fluid_lib.buffer_to_string(buffer)))
