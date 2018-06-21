@@ -38,4 +38,9 @@ function fluid_lib.cleanse_node_description(node)
 	return no_source
 end
 
+function fluid_lib.comma_value(n) -- credit http://richard.warburton.it
+	local left,num,right = string.match(n,'^([^%d]*%d)(%d*)(.-)$')
+	return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+end
+
 dofile(modpath.."/buffer.lua")

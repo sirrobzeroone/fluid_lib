@@ -12,17 +12,12 @@ local function preserve_metadata(pos, oldnode, oldmeta, drops)
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
 
-		local fluid_desc = "Empty"
-		if buffer.fluid ~= "" then
-			fluid_desc = fluid_lib.cleanse_node_description(buffer.fluid)
-		end
-
 		for i,stack in pairs(drops) do
 			local stack_meta = stack:get_meta()
 			stack_meta:set_int("fluid_storage", buffer.amount)
 			stack_meta:set_string("fluid", buffer.fluid)
-			stack_meta:set_string("description", ("%s\nContains: %s (%d/%d %s)"):format(ndef.description,
-				fluid_desc, buffer.amount, buffer.capacity, fluid_lib.unit))
+			stack_meta:set_string("description", ("%s\nContents: %s (%d/%d %s)"):format(ndef.description,
+				fluid_lib.buffer_to_string(buffer)))
 
 			drops[i] = stack
 		end
@@ -78,14 +73,9 @@ local function tank_on_timer(pos, elapsed)
 		meta:set_string("buffer_fluid", "")
 	end
 
-	local fluid_desc = "Empty"
-	if buffer.fluid ~= "" then
-		fluid_desc = fluid_lib.cleanse_node_description(buffer.fluid)
-	end
-
 	-- Update infotext
-	meta:set_string("infotext", ("%s\nContains: %s (%d/%d %s)"):format(ndef.description, fluid_desc,
-		buffer.amount, buffer.capacity, fluid_lib.unit))
+	meta:set_string("infotext", ("%s\nContents: %s"):format(ndef.description,
+		fluid_lib.buffer_to_string(buffer)))
 
 	local param2 = math.min(percentile * 63, 63)
 

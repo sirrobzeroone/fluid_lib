@@ -137,3 +137,16 @@ function fluid_lib.take_from_buffer(pos, buffer, count)
 
 	return bfdata.fluid, take_count
 end
+
+function fluid_lib.buffer_to_string(buffer)
+	if not buffer then return "" end
+	local amount      = fluid_lib.comma_value(buffer.amount)
+	local capacity    = fluid_lib.comma_value(buffer.capacity)
+	local description = "Empty"
+
+	if buffer.fluid ~= "" then
+		description = fluid_lib.cleanse_node_description(buffer.fluid)
+	end
+
+	return ("%s (%s / %s %s)"):format(description, amount, capacity, fluid_lib.unit)
+end
