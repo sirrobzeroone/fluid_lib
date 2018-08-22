@@ -112,9 +112,9 @@ function bucket.register_liquid(source, flowing, itemname, inventory_image, name
 				local place = true
 				local ppos  = pointed_thing.under
 				local node  = minetest.get_node(ppos)
-				if ndef.node_io_can_put_liquid and ndef.node_io_can_put_liquid(ppos, node, "") then
-					if ndef.node_io_room_for_liquid(ppos, node, "", source, 1000) >= 1000 then
-						ndef.node_io_put_liquid(ppos, node, "", nil, source, 1000)
+				if ndef.node_io_can_put_liquid and ndef.node_io_can_put_liquid(ppos, node, "N") then
+					if ndef.node_io_room_for_liquid(ppos, node, "N", source, 1000) >= 1000 then
+						ndef.node_io_put_liquid(ppos, node, "N", user, source, 1000)
 						if ndef.on_timer then
 							minetest.get_node_timer(ppos):start(ndef.node_timer_seconds or 1.0)
 						end
@@ -243,17 +243,17 @@ minetest.register_craftitem("bucket:bucket_empty", {
 		itemstack = ItemStack("bucket:bucket_empty")
 
 		-- Remove fluid from buffers if present
-		if ndef.node_io_can_take_liquid and ndef.node_io_can_take_liquid(lpos, node, "") then
-			local bfc = ndef.node_io_get_liquid_size(lpos, node, "")
+		if ndef.node_io_can_take_liquid and ndef.node_io_can_take_liquid(lpos, node, "N") then
+			local bfc = ndef.node_io_get_liquid_size(lpos, node, "N")
 			local buffers = {}
 			for i = 1, bfc do
-				buffers[i] = ndef.node_io_get_liquid_name(lpos, node, "", i)
+				buffers[i] = ndef.node_io_get_liquid_name(lpos, node, "N", i)
 			end
 
 			if #buffers > 0 then
 				for id,fluid in pairs(buffers) do
 					if fluid ~= "" then
-						local took = ndef.node_io_take_liquid(lpos, node, "", nil, fluid, 1000)
+						local took = ndef.node_io_take_liquid(lpos, node, "", user, fluid, 1000)
 						if took.millibuckets == 1000 and took.name == fluid then
 							if bucket.liquids[fluid] then
 								itemstack = ItemStack(bucket.liquids[fluid].itemname)
