@@ -110,20 +110,15 @@ function bucket.register_liquid(source, flowing, itemname, inventory_image, name
 
 				-- Fill any fluid buffers if present
 				local place = true
-				if ndef.fluid_buffers then
-					local ppos    = pointed_thing.under
-					local buffers = fluid_lib.get_node_buffers(ppos)
-					if buffers then
-						for buffer in pairs(buffers) do
-							if fluid_lib.can_insert_into_buffer(ppos, buffer, source, 1000) == 1000 then
-								fluid_lib.insert_into_buffer(ppos, buffer, source, 1000)
-								if ndef.on_timer then
-									minetest.get_node_timer(ppos):start(ndef.node_timer_seconds or 1.0)
-								end
-								place = false
-								break
-							end
+				local ppos  = pointed_thing.under
+				local node  = minetest.get_node(ppos)
+				if ndef.node_io_can_put_liquid and ndef.node_io_can_put_liquid(ppos, node, "") then
+					if ndef.node_io_room_for_liquid(ppos, node, "", source, 1000) >= 1000 then
+						ndef.node_io_put_liquid(ppos, node, "", nil, source, 1000)
+						if ndef.on_timer then
+							minetest.get_node_timer(ppos):start(ndef.node_timer_seconds or 1.0)
 						end
+						place = false
 					end
 				end
 
@@ -248,19 +243,26 @@ minetest.register_craftitem("bucket:bucket_empty", {
 		itemstack = ItemStack("bucket:bucket_empty")
 
 		-- Remove fluid from buffers if present
-		if ndef.fluid_buffers then
-			local buffers = fluid_lib.get_node_buffers(lpos)
-			if buffers then
-				for buffer in pairs(buffers) do
-					if fluid_lib.can_take_from_buffer(lpos, buffer, 1000) == 1000 then
-						local fluid = fluid_lib.take_from_buffer(lpos, buffer, 1000)
-						if bucket.liquids[fluid] then
-							itemstack = ItemStack(bucket.liquids[fluid].itemname)
-							if ndef.on_timer then
-								minetest.get_node_timer(lpos):start(ndef.node_timer_seconds or 1.0)
+		if ndef.node_io_can_take_liquid and ndef.node_io_can_take_liquid(lpos, node, "") then
+			local bfc = ndef.node_io_get_liquid_size(lpos, node, "")
+			local buffers = {}
+			for i = 1, bfc do
+				buffers[i] = ndef.node_io_get_liquid_name(lpos, node, "", i)
+			end
+
+			if #buffers > 0 then
+				for id,fluid in pairs(buffers) do
+					if fluid ~= "" then
+						local took = ndef.node_io_take_liquid(lpos, node, "", nil, fluid, 1000)
+						if took.millibuckets == 1000 and took.name == fluid then
+							if bucket.liquids[fluid] then
+								itemstack = ItemStack(bucket.liquids[fluid].itemname)
+								if ndef.on_timer then
+									minetest.get_node_timer(lpos):start(ndef.node_timer_seconds or 1.0)
+								end
+								break
 							end
 						end
-						break
 					end
 				end
 			end
