@@ -44,3 +44,4 @@ function fluid_lib.comma_value(n) -- credit http://richard.warburton.it
 end
 
 dofile(modpath.."/buffer.lua")
+dofile(modpath.."/nodeio.lua")

@@ -144,6 +144,12 @@ local function create_tank_node(tankname, def, fluid_name)
 		preserve_metadata = preserve_metadata,
 		after_place_node = after_place_node,
 	})
+
+	if tankname:match("^:") then
+		tankname = tankname:sub(2)
+	end
+
+	fluid_lib.register_node(tankname)
 end
 
 function fluid_tanks.register_tank(tankname, def)
