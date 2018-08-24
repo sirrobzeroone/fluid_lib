@@ -52,7 +52,7 @@ local nodeiodef = {
 			local storage = bfdata.amount
 			local fluid = bfdata.fluid
 			if (fluid == want_liquid or want_liquid == "") and storage >= want_millibuckets then
-				name,took = fluid_lib.take_from_buffer(pos, buffer, want_millibuckets)
+				name, took = fluid_lib.take_from_buffer(pos, buffer, want_millibuckets)
 				if took > 0 then break end
 			end
 		end
@@ -75,6 +75,7 @@ local nodeiodef = {
 		for buf in pairs(bfs) do
 			cnt[#cnt + 1] = buf
 		end
+		if not cnt[index] then return ItemStack(nil) end
 		local meta = minetest.get_meta(pos)
 
 		return meta:get_string(cnt[index] .. "_fluid")
@@ -86,6 +87,7 @@ local nodeiodef = {
 		for buf in pairs(bfs) do
 			cnt[#cnt + 1] = buf
 		end
+		if not cnt[index] then return ItemStack(nil) end
 		local meta = minetest.get_meta(pos)
 
 		return ItemStack(meta:get_string(cnt[index] .. "_fluid") .. " " ..

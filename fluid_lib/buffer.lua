@@ -87,8 +87,8 @@ end
 
 function fluid_lib.insert_into_buffer(pos, buffer, fluid, count)
 	local bfdata = fluid_lib.get_buffer_data(pos, buffer)
-	if not bfdata then return 0 end
-	if bfdata.fluid ~= fluid and bfdata.fluid ~= "" then return 0 end
+	if not bfdata then return count end
+	if bfdata.fluid ~= fluid and bfdata.fluid ~= "" then return count end
 
 	local can_put = fluid_lib.can_insert_into_buffer(pos, buffer, fluid, count)
 
