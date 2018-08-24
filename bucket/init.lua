@@ -1,6 +1,8 @@
 -- Minetest 0.4 mod: bucket
 -- See README.md for licensing and other information.
 
+local napi = minetest.get_modpath("node_io")
+
 minetest.register_alias("bucket",       "bucket:bucket_empty")
 minetest.register_alias("bucket_water", "bucket:bucket_water")
 minetest.register_alias("bucket_lava",  "bucket:bucket_lava")
@@ -112,9 +114,21 @@ function bucket.register_liquid(source, flowing, itemname, inventory_image, name
 				local place = true
 				local ppos  = pointed_thing.under
 				local node  = minetest.get_node(ppos)
-				if ndef.node_io_can_put_liquid and ndef.node_io_can_put_liquid(ppos, node, "N") then
-					if ndef.node_io_room_for_liquid(ppos, node, "N", source, 1000) >= 1000 then
-						ndef.node_io_put_liquid(ppos, node, "N", user, source, 1000)
+
+				-- Node IO Support
+				local usedef = ndef
+				local defpref = "node_io_"
+				local lookat = "N"
+
+				if napi then
+					usedef = node_io
+					lookat = node_io.get_pointed_side(user, pointed_thing)
+					defpref = ""
+				end
+
+				if usedef[defpref..'can_put_liquid'] and usedef[defpref..'can_put_liquid'](ppos, node, lookat) then
+					if usedef[defpref..'room_for_liquid'](ppos, node, lookat, source, 1000) >= 1000 then
+						usedef[defpref..'put_liquid'](ppos, node, lookat, user, source, 1000)
 						if ndef.on_timer then
 							minetest.get_node_timer(ppos):start(ndef.node_timer_seconds or 1.0)
 						end
@@ -242,18 +256,29 @@ minetest.register_craftitem("bucket:bucket_empty", {
 
 		itemstack = ItemStack("bucket:bucket_empty")
 
+		-- Node IO Support
+		local usedef = ndef
+		local defpref = "node_io_"
+		local lookat = "N"
+
+		if napi then
+			usedef = node_io
+			lookat = node_io.get_pointed_side(user, pointed_thing)
+			defpref = ""
+		end
+
 		-- Remove fluid from buffers if present
-		if ndef.node_io_can_take_liquid and ndef.node_io_can_take_liquid(lpos, node, "N") then
-			local bfc = ndef.node_io_get_liquid_size(lpos, node, "N")
+		if usedef[defpref..'can_take_liquid'] and usedef[defpref..'can_take_liquid'](lpos, node, lookat) then
+			local bfc = usedef[defpref..'get_liquid_size'](lpos, node, lookat)
 			local buffers = {}
 			for i = 1, bfc do
-				buffers[i] = ndef.node_io_get_liquid_name(lpos, node, "N", i)
+				buffers[i] = usedef[defpref..'get_liquid_name'](lpos, node, lookat, i)
 			end
 
 			if #buffers > 0 then
 				for id,fluid in pairs(buffers) do
 					if fluid ~= "" then
-						local took = ndef.node_io_take_liquid(lpos, node, "", user, fluid, 1000)
+						local took = usedef[defpref..'take_liquid'](lpos, node, lookat, user, fluid, 1000)
 						if took.millibuckets == 1000 and took.name == fluid then
 							if bucket.liquids[fluid] then
 								itemstack = ItemStack(bucket.liquids[fluid].itemname)
