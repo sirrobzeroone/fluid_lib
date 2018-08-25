@@ -2,10 +2,10 @@
 -- Node IO System
 local nodeiodef = {
 	node_io_can_put_liquid = function (pos, node, side)
-		return ele.helpers.get_item_group(node.name, 'fluid_container')
+		return minetest.get_item_group(node.name, 'fluid_container') > 0
 	end,
 	node_io_can_take_liquid = function (pos, node, side)
-		return ele.helpers.get_item_group(node.name, 'fluid_container')
+		return minetest.get_item_group(node.name, 'fluid_container') > 0
 	end,
 		-- if false, transfer node should only put and take in 1000 increments
 		-- inventory nodes that don't accept milibuckets should:

@@ -254,8 +254,6 @@ minetest.register_craftitem("bucket:bucket_empty", {
 			return
 		end
 
-		itemstack = ItemStack("bucket:bucket_empty")
-
 		-- Node IO Support
 		local usedef = ndef
 		local defpref = "node_io_"
