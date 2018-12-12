@@ -10,7 +10,14 @@ function fluid_lib.register_extractor_node(nodename, nodedef)
 	nodedef.groups["fluid_transport_source"] = 1
 	nodedef.paramtype2 = "facedir"
 	nodedef.legacy_facedir_simple = true
+
 	nodedef.on_timer = fluid_lib.transfer_timer_tick
+	nodedef.node_io_on_neighbor_update = function (pos, node, side)
+		local t = minetest.get_node_timer(pos)
+		if not t:is_started() then
+			t:start(1.0)
+		end
+	end
 
 	local orig_construct = nodedef.on_construct
 	nodedef.on_construct = function (pos)
