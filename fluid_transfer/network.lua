@@ -196,7 +196,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 					for i = 1, fl_size do
 						pp[i] = destdef.node_io_get_liquid_name(pos, destnode, "", i)
 					end
-					if not #pp then pp = nil end
+					if #pp == 0 then pp = nil end
 				end
 			end
 
