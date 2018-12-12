@@ -64,6 +64,8 @@ local function check_node(targets, all_nodes, pos, p_pos, pnodeid, queue)
 	local meta = minetest.get_meta(pos)
 	local ndef = minetest.registered_nodes[node.name]
 
+	if not ndef then return end
+
 	if minetest.get_item_group(node.name, "fluid_transport") > 0 then
 		add_duct_node(all_nodes, pos, pnodeid, queue)
 		return
@@ -99,9 +101,9 @@ local function fluid_targets(p_pos, pos)
 
 	local node = minetest.get_node(pos)
 	local ndef = minetest.registered_nodes[node.name]
-	if node and minetest.get_item_group(node.name, "fluid_transport") > 0 then
+	if ndef and minetest.get_item_group(node.name, "fluid_transport") > 0 then
 		add_duct_node(all_nodes, pos, pnodeid, queue)
-	elseif node and ndef['node_io_can_put_liquid'] and ndef['node_io_can_put_liquid'](pos, node, "") then
+	elseif ndef and ndef['node_io_can_put_liquid'] and ndef['node_io_can_put_liquid'](pos, node, "") then
 		queue = {p_pos}
 	end
 
@@ -135,7 +137,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	local tnode = minetest.get_node(tpos)
 	local ndef  = minetest.registered_nodes[tnode.name]
 	if minetest.get_item_group(tnode.name, "fluid_transport") == 0 and
-		(not ndef['node_io_can_put_liquid'] or not ndef['node_io_can_put_liquid'](tpos, tnode, "")) then
+		(not ndef or not ndef['node_io_can_put_liquid'] or not ndef['node_io_can_put_liquid'](tpos, tnode, "")) then
 		minetest.forceload_free_block(pos)
 		return
 	end
@@ -160,7 +162,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	local srcdef = minetest.registered_nodes[srcnode.name]
 
 	-- Make sure source node is a registered fluid container
-	if not srcdef['node_io_can_take_liquid'] then
+	if not srcdef or not srcdef['node_io_can_take_liquid'] then
 		return false
 	end
 
@@ -168,7 +170,6 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	if not c then return false end
 
 	local srcmeta = minetest.get_meta(srcpos)
-	local srcdef  = minetest.registered_nodes[srcnode.name]
 	local fl_size = srcdef.node_io_get_liquid_size(srcpos, srcnode, "")
 	local buffers = {}
 	for i = 1, fl_size do
@@ -188,7 +189,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 			local destdef  = minetest.registered_nodes[destnode.name]
 			local pp = nil
 
-			if destdef['node_io_can_put_liquid'] then
+			if destdef and destdef['node_io_can_put_liquid'] then
 				if destdef.node_io_can_put_liquid(pos, destnode, "") then
 					pp = {}
 					local fl_size = destdef.node_io_get_liquid_size(pos, destnode, "")
