@@ -1,6 +1,8 @@
 -- Fluid Tanks
 -- Copyright (c) 2018 Evert "Diamond" Prants <evert@lunasqu.ee>
 
+local modpath = minetest.get_modpath(minetest.get_current_modname())
+
 fluid_tanks = {}
 
 -- Preserve fluid count in the item stack dropped
@@ -199,8 +201,4 @@ function fluid_tanks.register_tank(tankname, def)
 	end
 end
 
-fluid_tanks.register_tank("fluid_tanks:tank", {
-	description = "Fluid Tank",
-	capacity = 16000,
-	accepts = true,
-})
+dofile(modpath.."/register.lua")
