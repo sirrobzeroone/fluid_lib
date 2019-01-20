@@ -151,7 +151,7 @@ function bucket.get_liquid_for_bucket(itemname)
 
 	for source, b in pairs(bucket.liquids) do
 		if b.itemname and b.itemname == itemname then
-			found = source
+			found = b.source
 			break
 		end
 	end
