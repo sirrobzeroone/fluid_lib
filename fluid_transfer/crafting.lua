@@ -18,3 +18,13 @@ minetest.register_craft({
 		{"default:stone",  "default:stone",  "default:stone"},
 	}
 })
+
+-- Trash
+minetest.register_craft({
+	output = "fluid_transfer:fluid_trash",
+	recipe = {
+		{"default:cobble",  "default:cobble",  "default:cobble"},
+		{"default:stone", "bucket:bucket_empty", "default:stone"},
+		{"default:stone",  "fluid_transfer:fluid_duct",  "default:stone"},
+	}
+})
