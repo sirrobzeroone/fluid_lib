@@ -152,6 +152,18 @@ local function create_tank_node(tankname, def, fluid_name)
 	end
 
 	fluid_lib.register_node(tankname)
+
+	if srcnode then
+		if srcnode:match("^:") then
+			srcnode = srcnode:sub(2)
+		end
+
+		minetest.register_craft({
+			type = "shapeless",
+			output = srcnode,
+			recipe = { tankname },
+		})
+	end
 end
 
 function fluid_tanks.register_tank(tankname, def)
