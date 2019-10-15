@@ -32,7 +32,12 @@ function fluid_lib.cleanse_node_description(node)
 	local ndef = minetest.registered_nodes[node]
 	if not ndef then return nil end
 
-	local no_source = ndef.description:gsub("(%s?Source%s?)", "")
+	local desc_no_translation = ndef.description
+	if string.match(desc_no_translation, "^\27") ~= nil then
+		desc_no_translation = desc_no_translation:match("[)]([%w%s]+)\27")
+	end
+
+	local no_source = desc_no_translation:gsub("(%s?Source%s?)", "")
 
 	fluid_lib.fluid_description_cache[node] = no_source
 	return no_source
