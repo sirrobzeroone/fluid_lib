@@ -47,6 +47,10 @@ function fluid_lib.buffer_accepts_fluid(pos, buffer, fluid)
 	local bfdata = fluid_lib.get_buffer_data(pos, buffer)
 	if not bfdata then return false end
 
+	if not bfdata.accepts then
+		return false
+	end
+
 	if bfdata.fluid ~= "" and bfdata.fluid ~= fluid then
 		return false
 	end

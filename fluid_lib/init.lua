@@ -32,6 +32,7 @@ function fluid_lib.cleanse_node_description(node)
 	local ndef = minetest.registered_nodes[node]
 	if not ndef then return nil end
 
+	-- Remove translation string
 	local desc_no_translation = ndef.description
 	if string.match(desc_no_translation, "^\27") ~= nil then
 		desc_no_translation = desc_no_translation:match("[)]([%w%s]+)\27")

@@ -212,7 +212,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 								local fluidcount = srcdef.node_io_get_liquid_stack(srcpos, srcnode, "", aindex):get_count()
 								local defc = math.min(fluidcount, idef)
 								local defi = srcdef.node_io_take_liquid(srcpos, srcnode, "", nil, afluid, defc)
-								if defi.millibuckets > 0 then
+								if defi and defi.millibuckets > 0 then
 									local lo = destdef.node_io_put_liquid(pos, destnode, "", nil, afluid, defi.millibuckets)
 									pumped = pumped + (defi.millibuckets - lo)
 									changed = true
