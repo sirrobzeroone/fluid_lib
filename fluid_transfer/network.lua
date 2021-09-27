@@ -124,12 +124,13 @@ end
 function fluid_lib.transfer_timer_tick(pos, elapsed)
 	local refresh = true
 	local node    = minetest.get_node_or_nil(pos)
-
+	local status  = "Fluid Pump"
 	if not node then
 		return false
 	end
 
 	local meta    = minetest.get_meta(pos)
+
 	local targets = {}
 
 	-- Only allow the node directly behind to be a start of a network
@@ -144,9 +145,9 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 
 	-- Retrieve network
 	targets = fluid_targets(pos, tpos)
-
 	-- No targets, don't proceed
 	if #targets == 0 then
+		meta:set_string("infotext", status.."\nNo Recieving Tank")
 		return true
 	end
 
@@ -156,6 +157,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 
 	-- Make sure source node is not air
 	if not srcnode or srcnode.name == "air" then
+		meta:set_string("infotext", status.."\nNo Source Tank")
 		return true
 	end
 
@@ -163,11 +165,15 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 
 	-- Make sure source node is a registered fluid container
 	if not srcdef or not srcdef['node_io_can_take_liquid'] then
+		meta:set_string("infotext", status.." Off")
 		return false
 	end
 
 	local c = srcdef.node_io_can_take_liquid(srcpos, srcnode, "")
-	if not c then return false end
+	if not c then
+		meta:set_string("infotext", status.." Off")
+		return false 
+	end
 
 	local srcmeta = minetest.get_meta(srcpos)
 	local fl_size = srcdef.node_io_get_liquid_size(srcpos, srcnode, "")
@@ -175,7 +181,10 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	for i = 1, fl_size do
 		buffers[i] = srcdef.node_io_get_liquid_name(srcpos, srcnode, "", i)
 	end
-	if not #buffers then return true end
+	if not #buffers then 
+		meta:set_string("infotext", status.."\nNo Source Tank")
+		return true 
+	end
 
 	-- Limit the amount of fluid pumped per cycle
 	local pcapability = get_node_property(meta, pos, "fluid_pump_capacity")
@@ -184,7 +193,9 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 	-- Transfer some fluid here
 	for _,pos in pairs(targets) do
 		if not vector.equals(pos, srcpos) then
+			
 			if pumped >= pcapability then break end
+			
 			local destnode = minetest.get_node(pos)
 			local destdef  = minetest.registered_nodes[destnode.name]
 			local pp = nil
@@ -203,10 +214,39 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 			local changed = false
 
 			if pp ~= nil then
-				for bindex,bfluid in pairs(pp) do
-					for aindex,afluid in pairs(buffers) do
-						if pumped >= pcapability then break end
-						if (afluid == bfluid or bfluid == "") then
+				for bindex,bfluid in pairs(pp) do            -- bfluid = source fluid name 
+					for aindex,afluid in pairs(buffers) do   -- afluid = destination fluid name
+						
+						-- get fluid names for pump status						
+						local bfluid_des = ""
+						local afluid_des = ""
+						
+						if bfluid ~= "" then
+							bfluid_des = minetest.registered_nodes[bfluid].description
+						end
+						
+						if afluid ~= "" then
+							afluid_des = minetest.registered_nodes[afluid].description
+						end						
+						
+						if pumped >= pcapability then 
+							meta:set_string("infotext", status.."\nPumped Max Volume".." "..bfluid_des)
+							break 
+						end
+						
+						if (afluid == bfluid or bfluid == "") then -- S01 best guess "" = Water, unsure why.
+					
+							if afluid == "" and bfluid == "" then
+								meta:set_string("infotext", status.."\nStandby")
+							
+							elseif bfluid == "" then
+								--bfluid_des = minetest.registered_nodes["default:water_source"].description
+								meta:set_string("infotext", status.."\nPumping Infrequently")
+								
+							else
+								meta:set_string("infotext", status.."\nPumping "..bfluid_des)
+							end
+							
 							local idef = destdef.node_io_room_for_liquid(pos, destnode, "", afluid, pcapability)
 							if idef > 0 then
 								local fluidcount = srcdef.node_io_get_liquid_stack(srcpos, srcnode, "", aindex):get_count()
@@ -221,6 +261,8 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 						end
 					end
 				end
+			else
+				meta:set_string("infotext", status.."\nStandby")	
 			end
 
 			if changed then
@@ -229,7 +271,7 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 			end
 		end
 	end
-
+		
 	return refresh
 end
 

@@ -19,6 +19,7 @@ fluid_lib.register_extractor_node("fluid_transfer:fluid_transfer_pump", {
 fluid_lib.register_transfer_node("fluid_transfer:fluid_duct", {
 	description = "Fluid Duct",
 	tiles = {"fluid_transfer_duct.png"},
+	use_texture_alpha = "clip",
 	groups = {oddly_breakable_by_hand = 1, cracky = 1}
 })
 
