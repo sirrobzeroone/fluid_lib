@@ -214,8 +214,8 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 			local changed = false
 
 			if pp ~= nil then
-				for bindex,bfluid in pairs(pp) do            -- bfluid = source fluid name 
-					for aindex,afluid in pairs(buffers) do   -- afluid = destination fluid name
+				for bindex,bfluid in pairs(pp) do            -- bfluid = destination fluid name
+					for aindex,afluid in pairs(buffers) do   -- afluid = source fluid name 
 						
 						-- get fluid names for pump status						
 						local bfluid_des = ""
@@ -234,29 +234,22 @@ function fluid_lib.transfer_timer_tick(pos, elapsed)
 							break 
 						end
 						
-						if (afluid == bfluid or bfluid == "") then -- S01 best guess "" = Water, unsure why.
-					
-							if afluid == "" and bfluid == "" then
-								meta:set_string("infotext", status.."\nStandby")
+						if (afluid == bfluid or bfluid == "") then -- bfluid = "", empty destiniation					
+							local idef = destdef.node_io_room_for_liquid(pos, destnode, "", afluid, pcapability)	
 							
-							elseif bfluid == "" then
-								--bfluid_des = minetest.registered_nodes["default:water_source"].description
-								meta:set_string("infotext", status.."\nPumping Infrequently")
-								
-							else
-								meta:set_string("infotext", status.."\nPumping "..bfluid_des)
-							end
-							
-							local idef = destdef.node_io_room_for_liquid(pos, destnode, "", afluid, pcapability)
 							if idef > 0 then
 								local fluidcount = srcdef.node_io_get_liquid_stack(srcpos, srcnode, "", aindex):get_count()
 								local defc = math.min(fluidcount, idef)
 								local defi = srcdef.node_io_take_liquid(srcpos, srcnode, "", nil, afluid, defc)
+
 								if defi and defi.millibuckets > 0 then
 									local lo = destdef.node_io_put_liquid(pos, destnode, "", nil, afluid, defi.millibuckets)
 									pumped = pumped + (defi.millibuckets - lo)
+									meta:set_string("infotext", status.."\nPumping "..afluid_des)
 									changed = true
 								end
+							else
+								meta:set_string("infotext", status.."\nStandby")
 							end
 						end
 					end
